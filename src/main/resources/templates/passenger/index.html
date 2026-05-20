@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Đặt vé xe khách trực tuyến — nhanh chóng, tiện lợi, an toàn">
+    <title>Trang chủ | Bus Ticket Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <h1>Đặt vé xe khách trực tuyến</h1>
+        <p>Tìm chuyến xe phù hợp, chọn ghế ngồi và đặt vé chỉ trong vài phút</p>
+
+        <!-- Search Form -->
+        <div class="search-card">
+            <form th:action="@{/search}" method="get" th:object="${searchDTO}">
+                <div class="search-grid">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Điểm đi</label>
+                        <select class="form-control" th:field="*{fromLocationId}">
+                            <option value="">-- Chọn điểm đi --</option>
+                            <option th:each="loc : ${locations}"
+                                    th:value="${loc.id}"
+                                    th:text="${loc.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Điểm đến</label>
+                        <select class="form-control" th:field="*{toLocationId}">
+                            <option value="">-- Chọn điểm đến --</option>
+                            <option th:each="loc : ${locations}"
+                                    th:value="${loc.id}"
+                                    th:text="${loc.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label class="form-label">Ngày đi</label>
+                        <input type="date" class="form-control" th:field="*{departureDate}">
+                    </div>
+                    <button type="submit" class="btn btn-accent btn-lg">Tìm chuyến</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- INFO SECTION -->
+<section class="main-content">
+    <div class="container">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; text-align:center;">
+            <div class="card card-body">
+                <h3 style="margin-bottom:0.5rem;">Đặt vé nhanh chóng</h3>
+                <p class="text-muted">Tìm và đặt vé chỉ trong 3 bước đơn giản, không cần tài khoản</p>
+            </div>
+            <div class="card card-body">
+                <h3 style="margin-bottom:0.5rem;">Chọn ghế linh hoạt</h3>
+                <p class="text-muted">Xem sơ đồ ghế trực quan, chủ động lựa chọn vị trí ưa thích</p>
+            </div>
+            <div class="card card-body">
+                <h3 style="margin-bottom:0.5rem;">Tra cứu vé dễ dàng</h3>
+                <p class="text-muted">Kiểm tra thông tin vé bất kỳ lúc nào bằng mã vé và số điện thoại</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

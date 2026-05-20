@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đặt vé | Bus Ticket Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="main-content">
+    <div class="container">
+        <div style="max-width: 820px; margin: 0 auto;">
+
+            <div class="page-title">
+                <h2>Xác nhận đặt vé</h2>
+                <p class="text-muted">Kiểm tra thông tin chuyến và điền thông tin hành khách</p>
+            </div>
+
+            <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+
+                <!-- Trip & Seat Summary -->
+                <div class="card">
+                    <div class="card-header">Thông tin chuyến</div>
+                    <div class="card-body">
+                        <div class="ticket-row">
+                            <span class="ticket-label">Tuyến</span>
+                            <span class="ticket-value"
+                                  th:text="${trip.route.fromLocation.name + ' → ' + trip.route.toLocation.name}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Khởi hành</span>
+                            <span class="ticket-value"
+                                  th:text="${#temporals.format(trip.departureTime, 'HH:mm — dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Loại xe</span>
+                            <span class="ticket-value" th:text="${trip.bus.busType}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Biển số</span>
+                            <span class="ticket-value" th:text="${trip.bus.plateNumber}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Tài xế</span>
+                            <span class="ticket-value" th:text="${trip.bus.driverName}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Ghế đã chọn</span>
+                            <span class="ticket-value" style="color:var(--primary); font-size:1.1rem;"
+                                  th:text="'Ghế ' + ${seat.seatNumber}"></span>
+                        </div>
+                        <div class="ticket-row" style="border-bottom:none;">
+                            <span class="ticket-label">Giá vé</span>
+                            <span class="ticket-amount"
+                                  th:text="${#numbers.formatDecimal(trip.ticketPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="card">
+                    <div class="card-header">Thông tin hành khách</div>
+                    <div class="card-body">
+                        <form th:action="@{/book-ticket}" method="post" th:object="${bookingForm}">
+                            <input type="hidden" th:field="*{tripId}">
+                            <input type="hidden" th:field="*{seatId}">
+
+                            <div class="form-group">
+                                <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control"
+                                       th:field="*{customerName}"
+                                       th:classappend="${#fields.hasErrors('customerName')} ? ' is-invalid'"
+                                       placeholder="Nguyễn Văn A">
+                                <span class="error-text" th:if="${#fields.hasErrors('customerName')}"
+                                      th:errors="*{customerName}"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control"
+                                       th:field="*{phoneNumber}"
+                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? ' is-invalid'"
+                                       placeholder="0901234567">
+                                <span class="error-text" th:if="${#fields.hasErrors('phoneNumber')}"
+                                      th:errors="*{phoneNumber}"></span>
+                                <span class="form-hint">Dùng để tra cứu và hủy vé sau này</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Email (tuỳ chọn)</label>
+                                <input type="email" class="form-control"
+                                       th:field="*{email}"
+                                       placeholder="example@gmail.com">
+                            </div>
+
+                            <button type="submit" class="btn btn-accent btn-full btn-lg mt-2">
+                                Xác nhận đặt vé
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <a th:href="@{/trips/{id}/seats(id=${trip.id})}" class="btn btn-outline btn-sm">
+                    Quay lại chọn ghế khác
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

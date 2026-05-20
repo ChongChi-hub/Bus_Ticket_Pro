@@ -1,0 +1,61 @@
+package com.rikkei.busticketpro.security;
+
+import com.rikkei.busticketpro.entity.Status;
+import com.rikkei.busticketpro.entity.User;
+import lombok.Getter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Wrapper bọc User entity thành UserDetails cho Spring Security.
+ * Dùng để lấy thông tin user trong Controller qua Authentication.getPrincipal().
+ */
+public class CustomUserDetails implements UserDetails {
+
+    @Getter
+    private final User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Spring Security yêu cầu prefix "ROLE_"
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPasswordHash();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return user.getStatus() == Status.ACTIVE;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return user.getStatus() == Status.ACTIVE;
+    }
+}

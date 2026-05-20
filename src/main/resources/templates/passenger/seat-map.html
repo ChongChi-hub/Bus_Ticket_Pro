@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn ghế | Bus Ticket Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="main-content">
+    <div class="container">
+        <div class="page-title">
+            <h2>Chọn ghế</h2>
+            <p class="text-muted"
+               th:text="${trip.route.fromLocation.name + ' → ' + trip.route.toLocation.name}"></p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 360px; gap:2rem; align-items:start;">
+
+            <!-- Seat Map -->
+            <div class="card">
+                <div class="card-header">Sơ đồ ghế — <span th:text="${trip.bus.busType}"></span></div>
+                <div class="card-body">
+
+                    <!-- Legend -->
+                    <div class="seat-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot legend-available"></div> Còn trống
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-pending"></div> Đang giữ
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-booked"></div> Đã đặt
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot legend-selected"></div> Đang chọn
+                        </div>
+                    </div>
+
+                    <!-- Seat Grid (populated by JS) -->
+                    <div id="seat-container">
+                        <div id="seat-grid" class="seat-grid"></div>
+                    </div>
+                    <p id="loading-msg" class="text-muted mt-2" style="font-size:0.9rem;">Đang tải sơ đồ ghế...</p>
+                </div>
+            </div>
+
+            <!-- Trip Info + Selected Seat -->
+            <div>
+                <!-- Trip Info Card -->
+                <div class="card mb-2">
+                    <div class="card-header">Thông tin chuyến</div>
+                    <div class="card-body">
+                        <div class="ticket-row">
+                            <span class="ticket-label">Tuyến đường</span>
+                            <span class="ticket-value"
+                                  th:text="${trip.route.fromLocation.name + ' → ' + trip.route.toLocation.name}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Khởi hành</span>
+                            <span class="ticket-value fw-bold"
+                                  th:text="${#temporals.format(trip.departureTime, 'HH:mm dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Loại xe</span>
+                            <span th:switch="${trip.bus.busType.name()}">
+                                <span th:case="'SEAT'"      class="badge badge-seat">Ghế ngồi</span>
+                                <span th:case="'SLEEPER'"   class="badge badge-sleeper">Giường nằm</span>
+                                <span th:case="'LIMOUSINE'" class="badge badge-limousine">Limousine</span>
+                            </span>
+                        </div>
+                        <div class="ticket-row">
+                            <span class="ticket-label">Tài xế</span>
+                            <span class="ticket-value" th:text="${trip.bus.driverName}"></span>
+                        </div>
+                        <div class="ticket-row" style="border-bottom:none">
+                            <span class="ticket-label">Giá vé</span>
+                            <span class="trip-price"
+                                  th:text="${#numbers.formatDecimal(trip.ticketPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Seat Info -->
+                <div class="card hidden" id="selected-panel">
+                    <div class="card-header">Ghế đã chọn</div>
+                    <div class="card-body text-center">
+                        <div style="font-size:2rem; font-weight:900; color:var(--primary); margin-bottom:0.5rem;"
+                             id="selected-seat-label">--</div>
+                        <p class="text-muted mb-2" style="font-size:0.9rem;">Nhấn "Đặt vé" để tiếp tục</p>
+                        <a id="book-btn" href="#" class="btn btn-accent btn-full btn-lg">Đặt vé ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:inline="javascript">
+    const TRIP_ID = [[${trip.id}]];
+    const BASE_URL = '/book-ticket';
+
+    fetch('/api/seats?tripId=' + TRIP_ID)
+        .then(r => r.json())
+        .then(seats => {
+            document.getElementById('loading-msg').remove();
+            const grid = document.getElementById('seat-grid');
+
+            seats.forEach(seat => {
+                const btn = document.createElement('button');
+                btn.className = 'seat-btn';
+                btn.textContent = seat.seatNumber;
+                btn.title = 'Ghế ' + seat.seatNumber;
+
+                if (seat.status === 'AVAILABLE') {
+                    btn.classList.add('seat-available');
+                    btn.onclick = () => selectSeat(btn, seat);
+                } else if (seat.status === 'PENDING') {
+                    btn.classList.add('seat-pending');
+                    btn.disabled = true;
+                    btn.title += ' (Đang giữ)';
+                } else {
+                    btn.classList.add('seat-booked');
+                    btn.disabled = true;
+                    btn.title += ' (Đã đặt)';
+                }
+                grid.appendChild(btn);
+            });
+        })
+        .catch(() => {
+            document.getElementById('loading-msg').textContent = 'Không thể tải sơ đồ ghế. Vui lòng thử lại.';
+        });
+
+    function selectSeat(btn, seat) {
+        document.querySelectorAll('.seat-btn').forEach(b => b.classList.remove('seat-selected'));
+        btn.classList.add('seat-selected');
+
+        document.getElementById('selected-seat-label').textContent = 'Ghế ' + seat.seatNumber;
+        document.getElementById('book-btn').href = BASE_URL + '?tripId=' + TRIP_ID + '&seatId=' + seat.id;
+        document.getElementById('selected-panel').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>

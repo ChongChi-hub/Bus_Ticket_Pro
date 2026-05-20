@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav class="navbar" th:fragment="navbar">
+    <div class="container">
+        <a th:href="@{/}" class="navbar-brand">BUS <span>TICKET</span> PRO</a>
+        <div class="navbar-nav">
+            <a th:href="@{/}" class="nav-link">Trang chủ</a>
+            <a th:href="@{/tickets/lookup}" class="nav-link">Tra cứu vé</a>
+
+            <!-- Staff links -->
+            <div class="nav-divider" sec:authorize="hasAnyRole('STAFF','ADMIN')"></div>
+            <a th:href="@{/staff/pending-tickets}" class="nav-link"
+               sec:authorize="hasAnyRole('STAFF','ADMIN')">Quản lý vé</a>
+
+            <!-- Admin links -->
+            <a th:href="@{/admin/buses}" class="nav-link"
+               sec:authorize="hasRole('ADMIN')">Quản lý xe</a>
+            <a th:href="@{/admin/trips}" class="nav-link"
+               sec:authorize="hasRole('ADMIN')">Quản lý chuyến xe</a>
+            <a th:href="@{/admin/dashboard}" class="nav-link"
+               sec:authorize="hasRole('ADMIN')">Dashboard</a>
+
+            <div class="nav-divider"></div>
+
+            <!-- Not logged in -->
+            <a th:href="@{/login}"    class="nav-link" sec:authorize="!isAuthenticated()">Đăng nhập</a>
+            <a th:href="@{/register}" class="nav-link" sec:authorize="!isAuthenticated()">Đăng ký</a>
+
+            <!-- Logged in -->
+            <span class="nav-user" sec:authorize="isAuthenticated()">
+                Xin chào, <strong sec:authentication="name"></strong>
+            </span>
+            <a th:href="@{/my-tickets}" class="nav-link"
+               sec:authorize="isAuthenticated()">Vé của tôi</a>
+            <form th:action="@{/logout}" method="post" style="display:inline"
+                  sec:authorize="isAuthenticated()">
+                <button type="submit" class="nav-link">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
