@@ -36,7 +36,7 @@ public class TripService {
     private BusRepository busRepository;
 
     /**
-     * CORE-05: Tra cứu chuyến xe theo tuyến đường + ngày.
+     * Tra cứu chuyến xe theo tuyến đường + ngày.
      */
     public List<TripResultDTO> searchTrips(TripSearchDTO dto) {
         List<Trip> trips;

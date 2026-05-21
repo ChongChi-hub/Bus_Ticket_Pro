@@ -23,14 +23,14 @@ public class PaymentService {
     private EmailService emailService;
 
     /**
-     * CORE-08: Lấy danh sách vé đang chờ thanh toán (Staff).
+     * Lấy danh sách vé đang chờ thanh toán (Staff).
      */
     public List<Ticket> getPendingTickets() {
         return ticketRepository.findByStatusWithDetails(TicketStatus.PENDING);
     }
 
     /**
-     * CORE-08: Staff xác nhận thanh toán vé.
+     * Staff xác nhận thanh toán vé.
      * PENDING → PAID, ghế → BOOKED
      */
     @Transactional
@@ -55,8 +55,8 @@ public class PaymentService {
     }
 
     /**
-     * CORE-08: Staff hủy vé quá hạn chưa thanh toán.
-     * PENDING → CANCELLED, ghế → AVAILABLE
+     * Staff hủy vé quá hạn chưa thanh toán.
+     * PENDING -> CANCELLED, ghế -> AVAILABLE
      */
     @Transactional
     public void cancelByStaff(Long ticketId) {

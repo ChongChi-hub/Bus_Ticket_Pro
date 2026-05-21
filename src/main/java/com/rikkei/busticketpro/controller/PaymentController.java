@@ -41,12 +41,9 @@ public class PaymentController {
     @Value("${payos.cancel-url}")
     private String cancelUrl;
 
-    /**
-     * Helper tạo payment link từ Ticket
-     */
     public String createPayOSPaymentLink(Ticket ticket, String phone) throws Exception {
         String ticketCode = ticket.getTicketCode();
-        long orderCode = Long.parseLong(ticketCode.substring(3)); // Lấy phần số sau "BTP"
+        long orderCode = Long.parseLong(ticketCode.substring(3)); // Lấy phần số sau
         long amount = ticket.getTotalAmount().longValue();
 
         String dynamicReturnUrl = returnUrl + "?phone=" + phone;
@@ -71,9 +68,7 @@ public class PaymentController {
         return data.getCheckoutUrl();
     }
 
-    /**
-     * Tạo lại URL thanh toán cho vé PENDING
-     */
+     // Tạo lại URL thanh toán cho vé PENDING
     @GetMapping("/pay-now")
     public String payNow(@RequestParam String ticketCode,
                          @RequestParam String phone,

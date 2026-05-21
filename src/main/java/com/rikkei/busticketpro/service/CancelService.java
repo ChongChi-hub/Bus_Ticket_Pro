@@ -19,7 +19,7 @@ public class CancelService {
     private SeatRepository seatRepository;
 
     /**
-     * CORE-09: Hành khách hủy vé.
+     * Hành khách hủy vé.
      * Điều kiện:
      *   - Vé ở trạng thái PENDING (chưa thanh toán)
      *   - Thời gian hiện tại còn trước giờ khởi hành ít nhất 12 tiếng

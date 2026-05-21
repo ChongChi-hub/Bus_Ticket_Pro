@@ -18,7 +18,7 @@ public class HomeController {
     @Autowired
     private TripService tripService;
 
-    // Trang chủ — hiển thị form tìm kiếm chuyến xe và tất cả chuyến xe khả dụng
+    // Trang chu
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("locations", locationRepository.findAll());
@@ -27,7 +27,7 @@ public class HomeController {
         return "passenger/index";
     }
 
-    // Xử lý tìm kiếm — hiển thị danh sách chuyến phù hợp
+    //Tim kiem,
     @GetMapping("/search")
     public String search(@ModelAttribute TripSearchDTO searchDTO, Model model) {
         model.addAttribute("locations", locationRepository.findAll());

@@ -25,7 +25,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     /**
-     * CORE-01: Đăng ký tài khoản mới (role = PASSENGER).
+     * Đăng ký tài khoản mới (role = PASSENGER).
      */
     @Transactional
     public void register(RegisterDTO dto) {

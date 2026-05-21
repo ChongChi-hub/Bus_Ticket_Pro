@@ -44,7 +44,7 @@ public class EmailService {
         if (ticket == null) return;
 
         if (serviceId == null || serviceId.contains("YOUR_SERVICE_ID")) {
-            System.out.println("⚠️ Bỏ qua gửi email vì chưa cấu hình EmailJS keys.");
+            System.out.println(" Bỏ qua gửi email vì chưa cấu hình EmailJS keys.");
             return;
         }
 
@@ -76,12 +76,12 @@ public class EmailService {
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(EMAILJS_API_URL, request, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("✅ Đã gửi email xác nhận thành công qua EmailJS cho vé: " + ticket.getTicketCode());
+                System.out.println("Đã gửi email xác nhận thành công qua EmailJS cho vé: " + ticket.getTicketCode());
             } else {
-                System.err.println("❌ Lỗi khi gửi email qua EmailJS: " + response.getBody());
+                System.err.println("Lỗi khi gửi email qua EmailJS: " + response.getBody());
             }
         } catch (Exception e) {
-            System.err.println("❌ Exception khi gửi email: " + e.getMessage());
+            System.err.println("Exception khi gửi email: " + e.getMessage());
         }
     }
 }

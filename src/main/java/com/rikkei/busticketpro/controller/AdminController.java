@@ -41,11 +41,11 @@ public class AdminController {
         model.addAttribute("totalBuses", busService.getAllBuses().size());
         model.addAttribute("totalTrips", tripService.getAllTrips().size());
 
-        // Hướng 4: Báo cáo doanh thu & Top chuyến xe
+        // Báo cáo doanh thu va Top chuyến xe
         int currentYear = LocalDate.now().getYear();
         List<RevenueReportDTO> revenueData = ticketService.getRevenueByMonth(currentYear);
         
-        // Chuẩn bị dữ liệu cho Chart.js (mảng 12 tháng)
+        // chartjs
         BigDecimal[] monthlyRevenues = new BigDecimal[12];
         for (int i = 0; i < 12; i++) monthlyRevenues[i] = BigDecimal.ZERO;
         

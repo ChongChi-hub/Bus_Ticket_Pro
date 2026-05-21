@@ -10,10 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Wrapper bọc User entity thành UserDetails cho Spring Security.
- * Dùng để lấy thông tin user trong Controller qua Authentication.getPrincipal().
- */
 public class CustomUserDetails implements UserDetails {
 
     @Getter

@@ -58,7 +58,7 @@ public class BookingService {
         ticket.setStatus(TicketStatus.PENDING);
         ticketRepository.save(ticket);
 
-        // Cập nhật trạng thái ghế → PENDING
+        // Cập nhật trạng thái ghế -> PENDING
         seat.setStatus(SeatStatus.PENDING);
         seatRepository.save(seat);
 

@@ -27,7 +27,6 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // Spring Boot 4.x: constructor nhận UserDetailsService trực tiếp
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
@@ -70,7 +69,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-            // --- Form Login ---
+            // form login
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
@@ -81,7 +80,7 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            // --- Logout ---
+            // logout
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
@@ -91,7 +90,7 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            // --- Trang 403 Access Denied ---
+            // trang 403
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/access-denied")
             );

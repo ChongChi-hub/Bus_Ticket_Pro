@@ -16,7 +16,7 @@ public class BusService {
     @Autowired
     private BusRepository busRepository;
 
-    /** CORE-04: Lấy danh sách tất cả xe. */
+    /** Lấy danh sách tất cả xe. */
     public List<Bus> getAllBuses() {
         return busRepository.findAll();
     }
@@ -26,7 +26,7 @@ public class BusService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy xe"));
     }
 
-    /** CORE-04: Thêm xe mới. */
+    /** Thêm xe mới. */
     @Transactional
     public Bus createBus(BusDTO dto) {
         if (busRepository.existsByPlateNumber(dto.getPlateNumber())) {
@@ -43,20 +43,20 @@ public class BusService {
         return busRepository.save(bus);
     }
 
-    /** CORE-04: Cập nhật thông tin xe. */
+    /** Cập nhật thông tin xe. */
     @Transactional
     public Bus updateBus(Long id, BusDTO dto) {
         Bus bus = findById(id);
         bus.setPlateNumber(dto.getPlateNumber());
         bus.setBusType(dto.getBusType());
-        // Giữ cố định số ghế khi đã tạo xe mới (không cập nhật totalSeats)
+        // Giữ cố định số ghế khi đã tạo xe mới
         bus.setBrand(dto.getBrand());
         bus.setDriverName(dto.getDriverName());
         bus.setStatus(dto.getStatus());
         return busRepository.save(bus);
     }
 
-    /** CORE-04: Xóa (soft delete — đặt status = INACTIVE). */
+    /** Xóa (soft delete — đặt status = INACTIVE). */
     @Transactional
     public void deleteBus(Long id) {
         Bus bus = findById(id);
