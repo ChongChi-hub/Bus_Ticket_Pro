@@ -4,6 +4,9 @@ import com.rikkei.busticketpro.dto.TicketDetailDTO;
 import com.rikkei.busticketpro.entity.Ticket;
 import com.rikkei.busticketpro.entity.TicketStatus;
 import com.rikkei.busticketpro.repository.TicketRepository;
+import com.rikkei.busticketpro.entity.Seat;
+import com.rikkei.busticketpro.entity.SeatStatus;
+import com.rikkei.busticketpro.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,9 @@ public class TicketService {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private SeatRepository seatRepository;
 
     /**
      * CORE-07: Tra cứu vé chi tiết bằng mã vé + số điện thoại.
@@ -42,6 +48,11 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy vé: " + ticketCode));
         ticket.setStatus(TicketStatus.PAID);
         ticket.setPaidAt(LocalDateTime.now());
+
+        Seat seat = ticket.getSeat();
+        seat.setStatus(SeatStatus.BOOKED);
+        seatRepository.save(seat);
+
         return ticketRepository.save(ticket);
     }
 

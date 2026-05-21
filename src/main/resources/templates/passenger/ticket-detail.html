@@ -24,10 +24,10 @@
 
         <!-- Payment result banners -->
         <div th:if="${successMessage}" class="alert alert-success no-print" style="max-width:680px; margin: 0 auto 1.5rem; padding: 1rem 1.5rem; background:#d1fae5; border:1px solid #6ee7b7; border-radius:12px; color:#065f46; font-weight:600; text-align:center;">
-            ✅ <span th:text="${successMessage}"></span>
+            <span th:text="${successMessage}"></span>
         </div>
         <div th:if="${errorMessage}" class="alert alert-danger no-print" style="max-width:680px; margin: 0 auto 1.5rem; padding: 1rem 1.5rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:12px; color:#991b1b; font-weight:600; text-align:center;">
-            ❌ <span th:text="${errorMessage}"></span>
+            <span th:text="${errorMessage}"></span>
         </div>
 
         <div class="ticket-card" th:if="${ticket != null}">
@@ -119,11 +119,11 @@
         </div>
 
         <!-- Actions -->
-        <div class="text-center mt-3 no-print" th:if="${ticket != null}">
+        <div class="mt-3 no-print" th:if="${ticket != null}" style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <!-- Cancel button (only PENDING tickets) -->
             <form th:if="${ticket.status.name() == 'PENDING'}"
                   th:action="@{/cancel-ticket}" method="post"
-                  style="display:inline;"
+                  style="margin: 0;"
                   onsubmit="return confirm('Bạn có chắc muốn hủy vé này?')">
                 <input type="hidden" name="ticketId"    th:value="${ticket.ticketId}">
                 <input type="hidden" name="phoneNumber" th:value="${ticket.phoneNumber}">
@@ -135,10 +135,10 @@
                th:href="@{/payment/pay-now(ticketCode=${ticket.ticketCode}, phone=${ticket.phoneNumber})}"
                class="btn btn-primary"
                style="background: linear-gradient(135deg, #f59e0b, #d97706); border:none;">
-                💳 Thanh toán ngay
+                Thanh toán ngay
             </a>
 
-            <button onclick="window.print()" class="btn btn-outline">In vé</button>
+            <a href="javascript:window.print()" class="btn btn-outline">In vé</a>
             <a th:href="@{/tickets/lookup}" class="btn btn-outline">Tra cứu vé khác</a>
             <a th:href="@{/}" class="btn btn-primary">Về trang chủ</a>
         </div>

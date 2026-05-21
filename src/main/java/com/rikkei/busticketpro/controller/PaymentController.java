@@ -104,16 +104,13 @@ public class PaymentController {
                 // Gửi email xác nhận qua EmailJS (Bất đồng bộ)
                 emailService.sendPaymentSuccessEmail(ticket.getId());
 
-                redirectAttributes.addFlashAttribute("paymentSuccess", true);
-                redirectAttributes.addFlashAttribute("successMessage", "Thanh toán thành công qua PayOS! Vé đã được xác nhận.");
+                return "redirect:http://localhost:8080/tickets/" + ticketCode + "?phone=" + phone + "&paymentMessage=success";
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Giao dịch chưa hoàn tất.");
+                return "redirect:http://localhost:8080/tickets/" + ticketCode + "?phone=" + phone + "&paymentMessage=failed";
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xác thực thanh toán: " + e.getMessage());
+            return "redirect:http://localhost:8080/tickets/" + ticketCode + "?phone=" + phone + "&paymentMessage=error";
         }
-
-        return "redirect:/tickets/" + ticketCode + "?phone=" + phone;
     }
 
     @GetMapping("/cancel")
@@ -123,9 +120,6 @@ public class PaymentController {
         String orderCodeStr = params.get("orderCode");
         String ticketCode = "BTP" + orderCodeStr;
 
-        redirectAttributes.addFlashAttribute("paymentFailed", true);
-        redirectAttributes.addFlashAttribute("errorMessage", "Thanh toán bị hủy. Mã vé: " + ticketCode + " vẫn đang ở trạng thái chờ.");
-
-        return "redirect:/tickets/" + ticketCode + "?phone=" + phone;
+        return "redirect:http://localhost:8080/tickets/" + ticketCode + "?phone=" + phone + "&paymentMessage=cancel";
     }
 }

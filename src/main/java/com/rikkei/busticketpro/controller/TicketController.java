@@ -74,6 +74,8 @@ public class TicketController {
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
                                  RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
+            model.addAttribute("trip", tripService.findById(dto.getTripId()));
+            model.addAttribute("seat", seatService.findById(dto.getSeatId()));
             return "passenger/booking-form";
         }
 
@@ -84,6 +86,8 @@ public class TicketController {
             // Redirect sang endpoint tạo payment link (PayOS)
             return "redirect:/payment/pay-now?ticketCode=" + ticketCode + "&phone=" + dto.getPhoneNumber();
         } catch (RuntimeException e) {
+            model.addAttribute("trip", tripService.findById(dto.getTripId()));
+            model.addAttribute("seat", seatService.findById(dto.getSeatId()));
             model.addAttribute("errorMessage", e.getMessage());
             return "passenger/booking-form";
         }
@@ -99,8 +103,19 @@ public class TicketController {
     @GetMapping("/tickets/{code}")
     public String ticketDetail(@PathVariable String code,
                                @RequestParam String phone,
+                               @RequestParam(required = false) String paymentMessage,
                                Model model) {
         try {
+            if ("success".equals(paymentMessage)) {
+                model.addAttribute("successMessage", "Thanh toán thành công! Cảm ơn quý khách");
+            } else if ("failed".equals(paymentMessage)) {
+                model.addAttribute("errorMessage", "Giao dịch chưa hoàn tất.");
+            } else if ("cancel".equals(paymentMessage)) {
+                model.addAttribute("errorMessage", "Bạn đã hủy quá trình thanh toán.");
+            } else if ("error".equals(paymentMessage)) {
+                model.addAttribute("errorMessage", "Đã xảy ra lỗi trong quá trình xác thực thanh toán.");
+            }
+
             model.addAttribute("ticket", ticketService.getTicketDetail(code, phone));
             return "passenger/ticket-detail";
         } catch (RuntimeException e) {
