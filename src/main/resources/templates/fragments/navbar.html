@@ -32,8 +32,10 @@
             <span class="nav-user" sec:authorize="isAuthenticated()">
                 Xin chào, <strong sec:authentication="name"></strong>
             </span>
+            <a th:href="@{/profile}" class="nav-link"
+               sec:authorize="isAuthenticated()">Hồ sơ</a>
             <a th:href="@{/my-tickets}" class="nav-link"
-               sec:authorize="isAuthenticated()">Vé của tôi</a>
+               sec:authorize="hasRole('PASSENGER')">Vé của tôi</a>
             <form th:action="@{/logout}" method="post" style="display:inline"
                   sec:authorize="isAuthenticated()">
                 <button type="submit" class="nav-link">Đăng xuất</button>

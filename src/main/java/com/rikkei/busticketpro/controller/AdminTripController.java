@@ -5,7 +5,7 @@ import com.rikkei.busticketpro.entity.Status;
 import com.rikkei.busticketpro.entity.Trip;
 import com.rikkei.busticketpro.entity.TripStatus;
 import com.rikkei.busticketpro.repository.BusRepository;
-import com.rikkei.busticketpro.repository.RouteRepository;
+import com.rikkei.busticketpro.repository.LocationRepository;
 import com.rikkei.busticketpro.service.TripService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class AdminTripController {
     private TripService tripService;
 
     @Autowired
-    private RouteRepository routeRepository;
+    private LocationRepository locationRepository;
 
     @Autowired
     private BusRepository busRepository;
@@ -37,7 +37,7 @@ public class AdminTripController {
     @GetMapping("/trips/new")
     public String tripCreateForm(Model model) {
         model.addAttribute("tripDTO", new TripDTO());
-        model.addAttribute("routes", routeRepository.findAll());
+        model.addAttribute("locations", locationRepository.findAll());
         model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
         model.addAttribute("statuses", TripStatus.values());
         return "admin/trip-form";
@@ -48,8 +48,11 @@ public class AdminTripController {
                              BindingResult result,
                              Model model,
                              RedirectAttributes redirectAttributes) {
+        if (tripDTO.getFromLocationId() != null && tripDTO.getFromLocationId().equals(tripDTO.getToLocationId())) {
+            result.rejectValue("toLocationId", "error.toLocationId", "Điểm đến không được trùng với điểm đi");
+        }
         if (result.hasErrors()) {
-            model.addAttribute("routes", routeRepository.findAll());
+            model.addAttribute("locations", locationRepository.findAll());
             model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
             model.addAttribute("statuses", TripStatus.values());
             return "admin/trip-form";
@@ -59,7 +62,7 @@ public class AdminTripController {
             redirectAttributes.addFlashAttribute("successMessage", "Thêm chuyến xe mới và tạo sơ đồ ghế thành công!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            model.addAttribute("routes", routeRepository.findAll());
+            model.addAttribute("locations", locationRepository.findAll());
             model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
             model.addAttribute("statuses", TripStatus.values());
             return "admin/trip-form";
@@ -73,7 +76,9 @@ public class AdminTripController {
 
         TripDTO dto = new TripDTO();
         dto.setId(trip.getId());
-        dto.setRouteId(trip.getRoute().getId());
+        dto.setFromLocationId(trip.getRoute().getFromLocation().getId());
+        dto.setToLocationId(trip.getRoute().getToLocation().getId());
+        dto.setDistanceKm(trip.getRoute().getDistanceKm());
         dto.setBusId(trip.getBus().getId());
         dto.setDepartureTime(trip.getDepartureTime());
         dto.setArrivalTime(trip.getArrivalTime());
@@ -81,7 +86,7 @@ public class AdminTripController {
         dto.setStatus(trip.getStatus());
 
         model.addAttribute("tripDTO", dto);
-        model.addAttribute("routes", routeRepository.findAll());
+        model.addAttribute("locations", locationRepository.findAll());
         model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
         model.addAttribute("statuses", TripStatus.values());
         return "admin/trip-form";
@@ -93,8 +98,11 @@ public class AdminTripController {
                              BindingResult result,
                              Model model,
                              RedirectAttributes redirectAttributes) {
+        if (tripDTO.getFromLocationId() != null && tripDTO.getFromLocationId().equals(tripDTO.getToLocationId())) {
+            result.rejectValue("toLocationId", "error.toLocationId", "Điểm đến không được trùng với điểm đi");
+        }
         if (result.hasErrors()) {
-            model.addAttribute("routes", routeRepository.findAll());
+            model.addAttribute("locations", locationRepository.findAll());
             model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
             model.addAttribute("statuses", TripStatus.values());
             return "admin/trip-form";
@@ -104,7 +112,7 @@ public class AdminTripController {
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật chuyến xe thành công!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            model.addAttribute("routes", routeRepository.findAll());
+            model.addAttribute("locations", locationRepository.findAll());
             model.addAttribute("buses", busRepository.findByStatus(Status.ACTIVE));
             model.addAttribute("statuses", TripStatus.values());
             return "admin/trip-form";

@@ -20,45 +20,174 @@
             <p class="text-muted">Tổng quan hệ thống Bus Ticket Pro</p>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
+<div class="stats-grid">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white;">
                 <div class="stat-value" th:text="${totalBuses}">0</div>
-                <div class="stat-label">Tổng số xe</div>
+                <div class="stat-label" style="color: rgba(255,255,255,0.8)">Tổng số xe</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" style="background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: white;">
                 <div class="stat-value" th:text="${totalTrips}">0</div>
-                <div class="stat-label">Tổng số chuyến xe</div>
+                <div class="stat-label" style="color: rgba(255,255,255,0.8)">Tổng chuyến xe</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                <div class="stat-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                <div class="stat-label" style="color: rgba(255,255,255,0.8)">Doanh thu năm <span th:text="${currentYear}"></span></div>
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; margin-top: 1.5rem;">
+        <div class="dashboard-stats-container" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+            <!-- Biểu đồ doanh thu -->
+            <div class="card premium-card">
+                <div class="card-header">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-color);">Biểu đồ doanh thu năm <span th:text="${currentYear}"></span></h3>
+                </div>
+                <div class="card-body" style="position: relative; height: 350px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Leaderboard Top Chuyến Xe -->
+            <div class="card premium-card">
+                <div class="card-header">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-color);">Top 5 Chuyến Xe Hot</h3>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="leaderboard-list">
+                        <li th:each="top, iterStat : ${topTrips}" class="leaderboard-item">
+                            <div class="rank-badge" th:text="${iterStat.count}" th:classappend="'rank-' + ${iterStat.count}"></div>
+                            <div class="trip-info">
+                                <strong th:text="${top.trip.route.fromLocation.name + ' - ' + top.trip.route.toLocation.name}">Tuyến đường</strong>
+                                <div class="trip-sub" th:text="${#temporals.format(top.trip.departureTime, 'dd/MM HH:mm')}">Thời gian</div>
+                            </div>
+                            <div class="ticket-count">
+                                <span th:text="${top.ticketCount}">0</span> vé
+                            </div>
+                        </li>
+                        <li th:if="${#lists.isEmpty(topTrips)}" style="padding: 1rem; text-align: center; color: #6b7280;">
+                            Chưa có dữ liệu đặt vé.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; margin-top: 2rem;">
             <div class="card">
                 <div class="card-header">Quản lý xe</div>
                 <div class="card-body">
                     <p class="text-muted mb-2">Thêm, sửa, xóa thông tin xe khách trong hệ thống.</p>
-                    <a th:href="@{/admin/buses}" class="btn btn-primary">Quản lý xe</a>
-                    <a th:href="@{/admin/buses/new}" class="btn btn-outline">Thêm xe mới</a>
+                    <div class="card-actions">
+                        <a th:href="@{/admin/buses}" class="btn btn-primary">Quản lý xe</a>
+                        <a th:href="@{/admin/buses/new}" class="btn btn-outline">Thêm xe mới</a>
+                    </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Quản lý chuyến xe</div>
                 <div class="card-body">
                     <p class="text-muted mb-2">Thêm, sửa, hủy và quản lý các chuyến xe hoạt động.</p>
-                    <a th:href="@{/admin/trips}" class="btn btn-primary">Quản lý chuyến xe</a>
-                    <a th:href="@{/admin/trips/new}" class="btn btn-outline">Thêm chuyến mới</a>
+                    <div class="card-actions">
+                        <a th:href="@{/admin/trips}" class="btn btn-primary">Quản lý chuyến xe</a>
+                        <a th:href="@{/admin/trips/new}" class="btn btn-outline">Thêm chuyến mới</a>
+                    </div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Quản lý vé</div>
                 <div class="card-body">
                     <p class="text-muted mb-2">Xem và xử lý các vé đang chờ thanh toán.</p>
-                    <a th:href="@{/staff/pending-tickets}" class="btn btn-primary">Vé chờ thanh toán</a>
+                    <div class="card-actions">
+                        <a th:href="@{/staff/pending-tickets}" class="btn btn-primary">Vé chờ thanh toán</a>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        /*<![CDATA[*/
+        var monthlyRevenues = /*[[${monthlyRevenues}]]*/ [];
+        /*]]>*/
+
+        var ctx = document.getElementById('revenueChart').getContext('2d');
+        
+        // Tạo gradient màu cho biểu đồ cột
+        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.8)'); // #4f46e5
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.2)');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: monthlyRevenues,
+                    backgroundColor: gradient,
+                    borderColor: '#4f46e5',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.raw || 0;
+                                return value.toLocaleString('vi-VN') + ' ₫';
+                            }
+                        },
+                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                        padding: 12,
+                        titleFont: { family: "'Be Vietnam Pro', sans-serif", size: 14 },
+                        bodyFont: { family: "'Be Vietnam Pro', sans-serif", size: 14 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return (value / 1000000) + 'Tr';
+                                }
+                                return value.toLocaleString('vi-VN');
+                            },
+                            font: { family: "'Be Vietnam Pro', sans-serif" }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { family: "'Be Vietnam Pro', sans-serif" }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    });
+</script>
 
 <div th:replace="fragments/footer :: footer"></div>
 </body>

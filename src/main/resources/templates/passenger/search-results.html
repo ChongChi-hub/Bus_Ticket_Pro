@@ -96,5 +96,30 @@
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Restrict date inputs to prevent selecting past dates
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date().toISOString().split('T')[0];
+        dateInputs.forEach(input => {
+            input.setAttribute('min', today);
+        });
+
+        // Validate locations
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const fromLoc = document.getElementById('fromLocationId');
+                const toLoc = document.getElementById('toLocationId');
+                if (fromLoc && toLoc && fromLoc.value === toLoc.value && fromLoc.value !== "") {
+                    e.preventDefault();
+                    alert("Lỗi: Điểm đến không được trùng với điểm đi!");
+                    toLoc.focus();
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

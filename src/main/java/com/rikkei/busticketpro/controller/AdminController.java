@@ -14,6 +14,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.rikkei.busticketpro.dto.RevenueReportDTO;
+import com.rikkei.busticketpro.dto.TopTripDTO;
+import com.rikkei.busticketpro.service.TicketService;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -24,10 +33,36 @@ public class AdminController {
     @Autowired
     private TripService tripService;
 
+    @Autowired
+    private TicketService ticketService;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         model.addAttribute("totalBuses", busService.getAllBuses().size());
         model.addAttribute("totalTrips", tripService.getAllTrips().size());
+
+        // Hướng 4: Báo cáo doanh thu & Top chuyến xe
+        int currentYear = LocalDate.now().getYear();
+        List<RevenueReportDTO> revenueData = ticketService.getRevenueByMonth(currentYear);
+        
+        // Chuẩn bị dữ liệu cho Chart.js (mảng 12 tháng)
+        BigDecimal[] monthlyRevenues = new BigDecimal[12];
+        for (int i = 0; i < 12; i++) monthlyRevenues[i] = BigDecimal.ZERO;
+        
+        BigDecimal totalRevenue = BigDecimal.ZERO;
+        for (RevenueReportDTO dto : revenueData) {
+            int monthIndex = dto.getMonth() - 1;
+            monthlyRevenues[monthIndex] = dto.getRevenue();
+            totalRevenue = totalRevenue.add(dto.getRevenue());
+        }
+
+        List<TopTripDTO> topTrips = ticketService.getTopTrips(5);
+
+        model.addAttribute("currentYear", currentYear);
+        model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("monthlyRevenues", monthlyRevenues);
+        model.addAttribute("topTrips", topTrips);
+
         return "admin/dashboard";
     }
 

@@ -34,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     implementation 'org.modelmapper:modelmapper:3.2.0'
+    implementation 'vn.payos:payos-java:2.0.1'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 

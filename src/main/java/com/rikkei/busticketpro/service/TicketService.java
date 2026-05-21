@@ -2,10 +2,18 @@ package com.rikkei.busticketpro.service;
 
 import com.rikkei.busticketpro.dto.TicketDetailDTO;
 import com.rikkei.busticketpro.entity.Ticket;
+import com.rikkei.busticketpro.entity.TicketStatus;
 import com.rikkei.busticketpro.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.rikkei.busticketpro.dto.RevenueReportDTO;
+import com.rikkei.busticketpro.dto.TopTripDTO;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,6 +34,18 @@ public class TicketService {
     }
 
     /**
+     * VNPay: Cập nhật vé sang PAID sau khi thanh toán thành công.
+     */
+    @Transactional
+    public Ticket markAsPaid(String ticketCode) {
+        Ticket ticket = ticketRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé: " + ticketCode));
+        ticket.setStatus(TicketStatus.PAID);
+        ticket.setPaidAt(LocalDateTime.now());
+        return ticketRepository.save(ticket);
+    }
+
+    /**
      * Lấy danh sách vé của hành khách đã đăng nhập.
      */
     public List<Ticket> getMyTickets(Long userId) {
@@ -35,6 +55,20 @@ public class TicketService {
     public Ticket findById(Long id) {
         return ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy vé"));
+    }
+
+    public Ticket markFindByCode(String ticketCode) {
+        return ticketRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé: " + ticketCode));
+    }
+
+    public List<RevenueReportDTO> getRevenueByMonth(int year) {
+        return ticketRepository.getRevenueByMonth(year);
+    }
+
+    public List<TopTripDTO> getTopTrips(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return ticketRepository.getTopTrips(pageable);
     }
 
     private TicketDetailDTO toDTO(Ticket t) {

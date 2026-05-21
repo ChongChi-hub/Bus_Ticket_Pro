@@ -5,6 +5,7 @@ import com.rikkei.busticketpro.dto.TripResultDTO;
 import com.rikkei.busticketpro.dto.TripSearchDTO;
 import com.rikkei.busticketpro.entity.*;
 import com.rikkei.busticketpro.repository.BusRepository;
+import com.rikkei.busticketpro.repository.LocationRepository;
 import com.rikkei.busticketpro.repository.RouteRepository;
 import com.rikkei.busticketpro.repository.SeatRepository;
 import com.rikkei.busticketpro.repository.TripRepository;
@@ -29,17 +30,25 @@ public class TripService {
     private RouteRepository routeRepository;
 
     @Autowired
+    private LocationRepository locationRepository;
+
+    @Autowired
     private BusRepository busRepository;
 
     /**
      * CORE-05: Tra cứu chuyến xe theo tuyến đường + ngày.
      */
     public List<TripResultDTO> searchTrips(TripSearchDTO dto) {
-        LocalDateTime from = dto.getDepartureDate().atStartOfDay();
-        LocalDateTime to   = from.plusDays(1);
-
-        List<Trip> trips = tripRepository.searchTrips(
-                dto.getFromLocationId(), dto.getToLocationId(), from, to);
+        List<Trip> trips;
+        if (dto.getDepartureDate() == null) {
+            trips = tripRepository.searchTripsWithoutDate(
+                    dto.getFromLocationId(), dto.getToLocationId());
+        } else {
+            LocalDateTime from = dto.getDepartureDate().atStartOfDay();
+            LocalDateTime to   = from.plusDays(1);
+            trips = tripRepository.searchTrips(
+                    dto.getFromLocationId(), dto.getToLocationId(), from, to);
+        }
 
         return trips.stream()
                 .map(this::toDTO)
@@ -48,6 +57,15 @@ public class TripService {
 
     public List<Trip> getAllTrips() {
         return tripRepository.findAll();
+    }
+
+    /**
+     * Lấy danh sách tất cả các chuyến xe READY, map sang TripResultDTO để hiển thị trên Dashboard/Trang chủ
+     */
+    public List<TripResultDTO> getAllReadyTripResults() {
+        return tripRepository.findAllReadyTrips().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Trip findById(Long id) {
@@ -61,8 +79,7 @@ public class TripService {
     @Transactional
     public Trip createTrip(TripDTO dto) {
         Trip trip = new Trip();
-        trip.setRoute(routeRepository.findById(dto.getRouteId())
-                .orElseThrow(() -> new RuntimeException("Tuyến đường không tồn tại")));
+        trip.setRoute(getOrCreateRoute(dto.getFromLocationId(), dto.getToLocationId(), dto.getDistanceKm()));
         Bus bus = busRepository.findById(dto.getBusId())
                 .orElseThrow(() -> new RuntimeException("Xe không tồn tại"));
 
@@ -113,8 +130,7 @@ public class TripService {
     @Transactional
     public Trip updateTrip(Long id, TripDTO dto) {
         Trip trip = findById(id);
-        trip.setRoute(routeRepository.findById(dto.getRouteId())
-                .orElseThrow(() -> new RuntimeException("Tuyến đường không tồn tại")));
+        trip.setRoute(getOrCreateRoute(dto.getFromLocationId(), dto.getToLocationId(), dto.getDistanceKm()));
         Bus bus = busRepository.findById(dto.getBusId())
                 .orElseThrow(() -> new RuntimeException("Xe không tồn tại"));
 
@@ -154,5 +170,32 @@ public class TripService {
                 .distanceKm(trip.getRoute().getDistanceKm())
                 .availableSeats(available)
                 .build();
+    }
+
+    private Route getOrCreateRoute(Long fromLocationId, Long toLocationId, Double distanceKm) {
+        if (fromLocationId.equals(toLocationId)) {
+            throw new RuntimeException("Điểm đi và điểm đến không được trùng nhau");
+        }
+
+        List<Route> routes = routeRepository.findByFromAndTo(fromLocationId, toLocationId);
+        if (!routes.isEmpty()) {
+            Route existingRoute = routes.get(0);
+            if (!existingRoute.getDistanceKm().equals(distanceKm)) {
+                existingRoute.setDistanceKm(distanceKm);
+                return routeRepository.save(existingRoute);
+            }
+            return existingRoute;
+        }
+
+        Location from = locationRepository.findById(fromLocationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy điểm đi"));
+        Location to = locationRepository.findById(toLocationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy điểm đến"));
+
+        Route newRoute = new Route();
+        newRoute.setFromLocation(from);
+        newRoute.setToLocation(to);
+        newRoute.setDistanceKm(distanceKm);
+        return routeRepository.save(newRoute);
     }
 }

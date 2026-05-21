@@ -19,6 +19,9 @@ public class PaymentService {
     @Autowired
     private SeatRepository seatRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     /**
      * CORE-08: Lấy danh sách vé đang chờ thanh toán (Staff).
      */
@@ -46,6 +49,9 @@ public class PaymentService {
         Seat seat = ticket.getSeat();
         seat.setStatus(SeatStatus.BOOKED);
         seatRepository.save(seat);
+
+        // Gửi email xác nhận thanh toán (bất đồng bộ)
+        emailService.sendPaymentSuccessEmail(ticket.getId());
     }
 
     /**

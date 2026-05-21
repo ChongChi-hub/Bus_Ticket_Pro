@@ -2,10 +2,12 @@ package com.rikkei.busticketpro.controller;
 
 import com.rikkei.busticketpro.entity.Seat;
 import com.rikkei.busticketpro.entity.Trip;
+import com.rikkei.busticketpro.entity.Ticket;
 import com.rikkei.busticketpro.dto.BookingRequestDTO;
 import com.rikkei.busticketpro.entity.User;
 import com.rikkei.busticketpro.security.CustomUserDetails;
 import com.rikkei.busticketpro.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -68,6 +70,7 @@ public class TicketController {
     public String processBooking(@Valid @ModelAttribute("bookingForm") BookingRequestDTO dto,
                                  BindingResult result,
                                  Model model,
+                                 HttpServletRequest request,
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
                                  RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
@@ -77,9 +80,9 @@ public class TicketController {
         try {
             User user = userDetails != null ? userDetails.getUser() : null;
             String ticketCode = bookingService.processBooking(dto, user);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đặt vé thành công! Mã vé: " + ticketCode);
-            return "redirect:/tickets/" + ticketCode + "?phone=" + dto.getPhoneNumber();
+            
+            // Redirect sang endpoint tạo payment link (PayOS)
+            return "redirect:/payment/pay-now?ticketCode=" + ticketCode + "&phone=" + dto.getPhoneNumber();
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "passenger/booking-form";

@@ -28,4 +28,14 @@ public class TripResultDTO {
     private String plateNumber;
     private long availableSeats;
     private double distanceKm;
+
+    public String getDurationStr() {
+        if (departureTime == null || arrivalTime == null) {
+            return "Chưa xác định";
+        }
+        java.time.Duration duration = java.time.Duration.between(departureTime, arrivalTime);
+        long hours = duration.toHours();
+        long minutes = duration.toMinutes() % 60;
+        return hours + " Hr " + minutes + " Min";
+    }
 }

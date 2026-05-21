@@ -18,8 +18,15 @@ public class TripDTO {
 
     private Long id;
 
-    @NotNull(message = "Vui lòng chọn tuyến đường")
-    private Long routeId;
+    @NotNull(message = "Vui lòng chọn điểm đi")
+    private Long fromLocationId;
+
+    @NotNull(message = "Vui lòng chọn điểm đến")
+    private Long toLocationId;
+
+    @NotNull(message = "Vui lòng nhập khoảng cách")
+    @Positive(message = "Khoảng cách phải lớn hơn 0")
+    private Double distanceKm;
 
     @NotNull(message = "Vui lòng chọn xe")
     private Long busId;

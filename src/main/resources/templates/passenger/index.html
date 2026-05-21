@@ -54,6 +54,51 @@
     </div>
 </section>
 
+<!-- AVAILABLE TRIPS SECTION -->
+<section class="main-content" style="padding-bottom: 1rem;">
+    <div class="container" style="max-width: 1200px;">
+        <div class="page-title" style="margin-bottom: 2rem; text-align: center; border-bottom: none;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Chuyến Xe Khả Dụng</h2>
+            <p class="text-muted">Lựa chọn chuyến hành trình và đặt vé ngay hôm nay</p>
+        </div>
+
+        <!-- Trip Cards Grid -->
+        <div th:if="${trips != null and !#lists.isEmpty(trips)}" class="trip-cards-grid">
+            <div th:each="trip : ${trips}" class="dashboard-trip-card">
+                <div class="dtc-left">
+                    <div class="dtc-route">
+                        <span th:text="${trip.fromLocation}"></span>
+                        <span class="dtc-arrow">đi</span>
+                        <span th:text="${trip.toLocation}"></span>
+                    </div>
+                    <div class="dtc-info">
+                        <span class="dtc-duration" th:text="${trip.durationStr}"></span>
+                        <span class="dtc-dot">•</span>
+                        <span class="dtc-time" th:text="${#temporals.format(trip.departureTime, 'HH:mm - dd/MM/yyyy')}"></span>
+                        <span class="dtc-dot">•</span>
+                        <span class="dtc-avail" th:text="'Còn ' + ${trip.availableSeats} + ' ghế'"></span>
+                    </div>
+                </div>
+                
+                <div class="dtc-right">
+                    <div class="dtc-price-wrapper">
+                        <span class="dtc-price" th:text="${#numbers.formatDecimal(trip.ticketPrice, 0, 'POINT', 0, 'COMMA') + 'đ'}"></span>
+                        <span class="dtc-price-label">Từ</span>
+                    </div>
+                    <a th:href="@{/trips/{id}/seats(id=${trip.id})}" class="btn btn-booking">
+                        ĐẶT BÂY GIỜ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${trips == null or #lists.isEmpty(trips)}" style="background: white; border-radius: var(--radius-lg); padding: 3rem; text-align: center; box-shadow: var(--shadow-sm);">
+            <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Không có chuyến xe khả dụng</h3>
+            <p class="text-muted">Hiện tại chưa có chuyến xe nào được xếp lịch. Vui lòng quay lại sau.</p>
+        </div>
+    </div>
+</section>
+
 <!-- INFO SECTION -->
 <section class="main-content">
     <div class="container">
@@ -75,5 +120,30 @@
 </section>
 
 <div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Restrict date inputs to prevent selecting past dates
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date().toISOString().split('T')[0];
+        dateInputs.forEach(input => {
+            input.setAttribute('min', today);
+        });
+
+        // Validate locations
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const fromLoc = document.getElementById('fromLocationId');
+                const toLoc = document.getElementById('toLocationId');
+                if (fromLoc && toLoc && fromLoc.value === toLoc.value && fromLoc.value !== "") {
+                    e.preventDefault();
+                    alert("Lỗi: Điểm đến không được trùng với điểm đi!");
+                    toLoc.focus();
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

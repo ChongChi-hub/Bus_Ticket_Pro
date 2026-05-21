@@ -26,19 +26,47 @@
                     <form th:action="${tripDTO.id != null ? '/admin/trips/' + tripDTO.id + '/update' : '/admin/trips'}"
                           method="post" th:object="${tripDTO}">
 
-                        <!-- Tuyến đường -->
+                        <!-- Điểm đi -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Điểm đi <span class="text-danger">*</span></label>
+                                <select class="form-control" th:field="*{fromLocationId}"
+                                        th:classappend="${#fields.hasErrors('fromLocationId')} ? ' is-invalid'">
+                                    <option value="">-- Chọn điểm đi --</option>
+                                    <option th:each="l : ${locations}"
+                                            th:value="${l.id}"
+                                            th:text="${l.name}">
+                                    </option>
+                                </select>
+                                <span class="error-text" th:if="${#fields.hasErrors('fromLocationId')}"
+                                      th:errors="*{fromLocationId}"></span>
+                            </div>
+
+                            <!-- Điểm đến -->
+                            <div class="form-group">
+                                <label class="form-label">Điểm đến <span class="text-danger">*</span></label>
+                                <select class="form-control" th:field="*{toLocationId}"
+                                        th:classappend="${#fields.hasErrors('toLocationId')} ? ' is-invalid'">
+                                    <option value="">-- Chọn điểm đến --</option>
+                                    <option th:each="l : ${locations}"
+                                            th:value="${l.id}"
+                                            th:text="${l.name}">
+                                    </option>
+                                </select>
+                                <span class="error-text" th:if="${#fields.hasErrors('toLocationId')}"
+                                      th:errors="*{toLocationId}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Khoảng cách -->
                         <div class="form-group">
-                            <label class="form-label">Tuyến đường <span class="text-danger">*</span></label>
-                            <select class="form-control" th:field="*{routeId}"
-                                    th:classappend="${#fields.hasErrors('routeId')} ? ' is-invalid'">
-                                <option value="">-- Chọn tuyến đường --</option>
-                                <option th:each="r : ${routes}"
-                                        th:value="${r.id}"
-                                        th:text="${r.fromLocation.name + ' → ' + r.toLocation.name + ' (' + r.distanceKm + ' km)'}">
-                                </option>
-                            </select>
-                            <span class="error-text" th:if="${#fields.hasErrors('routeId')}"
-                                  th:errors="*{routeId}"></span>
+                            <label class="form-label">Khoảng cách (km) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" class="form-control"
+                                   th:field="*{distanceKm}"
+                                   th:classappend="${#fields.hasErrors('distanceKm')} ? ' is-invalid'"
+                                   placeholder="VD: 120.5" min="0.1">
+                            <span class="error-text" th:if="${#fields.hasErrors('distanceKm')}"
+                                  th:errors="*{distanceKm}"></span>
                         </div>
 
                         <!-- Xe khách -->
@@ -114,5 +142,30 @@
 </div>
 
 <div th:replace="fragments/footer :: footer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Restrict datetime-local inputs to prevent selecting past dates
+        const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const currentDateTime = now.toISOString().slice(0, 16);
+        dateInputs.forEach(input => {
+            input.setAttribute('min', currentDateTime);
+        });
+
+        // Validate locations
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const fromLoc = document.getElementById('fromLocationId');
+            const toLoc = document.getElementById('toLocationId');
+            if (fromLoc && toLoc && fromLoc.value === toLoc.value && fromLoc.value !== "") {
+                e.preventDefault();
+                alert("Lỗi: Điểm đến không được trùng với điểm đi!");
+                toLoc.focus();
+            }
+        });
+    });
+</script>
 </body>
 </html>

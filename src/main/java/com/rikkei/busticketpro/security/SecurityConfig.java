@@ -50,6 +50,7 @@ public class SecurityConfig {
                     "/tickets/lookup",
                     "/tickets/{code}",
                     "/cancel-ticket",
+                    "/payment/**",
                     "/register",
                     "/login",
                     "/access-denied"
